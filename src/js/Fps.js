@@ -19,6 +19,7 @@ class Fps {
     c.save();
 
     c.globalAlpha = 0.2;
+    c.fillStyle = "black";
     c.fillRect(this.position.x , this.position.y, this.width, this.height);
     
     c.fillStyle = "green";
