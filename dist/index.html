@@ -2,14 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Canvas Boilerplate | Chris Courses</title>
+    <title>Canvas Boilerplate | Andrii Pereverziev</title>
     <style>
-      body {
-        margin: 0;
+      html, body {
+      margin: 0px;
+      padding: 0px;
+      overflow: hidden;
       }
-    </style>
+      canvas {
+      box-sizing: border-box;
+      margin: 0px;
+      border: 0px solid red;
+      }
+      </style>
   <link rel="shortcut icon" href="favicon.ico"></head>
   <body>
-    <canvas></canvas>
+    <canvas id="canvas" width="640" height="480"></canvas>
   <script src="./js/canvas.bundle.js"></script></body>
 </html>

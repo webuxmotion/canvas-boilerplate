@@ -86,6 +86,164 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/js/Fps.js":
+/*!***********************!*\
+  !*** ./src/js/Fps.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Fps = /*#__PURE__*/function () {
+  function Fps(_ref) {
+    var canvasWidth = _ref.canvasWidth;
+
+    _classCallCheck(this, Fps);
+
+    this.times = [];
+    this.fps = 0;
+    this.lastUpdate = 0;
+    this.lastUpdateCounter = 0;
+    this.items = [];
+    this.lineWidth = 5;
+    this.maxItems = 30;
+    this.height = 50;
+    this.width = this.maxItems * this.lineWidth;
+    this.position = {
+      x: canvasWidth - this.width - 20,
+      y: 20
+    };
+  }
+
+  _createClass(Fps, [{
+    key: "draw",
+    value: function draw(_ref2) {
+      var c = _ref2.c;
+      c.save();
+      c.globalAlpha = 0.2;
+      c.fillRect(this.position.x, this.position.y, this.width, this.height);
+      c.fillStyle = "green";
+
+      for (var i = 0; i < this.maxItems; i++) {
+        var item = this.items[i];
+
+        if (item) {
+          var height = item * this.height / 70;
+          var x = this.position.x + i * this.lineWidth;
+          var y = this.position.y + this.height - height;
+          c.globalAlpha = 0.2;
+          c.fillRect(x, y, this.lineWidth, height);
+          c.globalAlpha = 1;
+          c.fillRect(x, y, this.lineWidth, 2);
+        }
+      }
+
+      c.font = "20px Arial";
+      c.fillText("FPS: ".concat(this.fps), this.position.x, this.position.y);
+      c.restore();
+    }
+  }, {
+    key: "update",
+    value: function update(_ref3) {
+      var c = _ref3.c;
+      this.draw({
+        c: c
+      });
+      var now = performance.now();
+
+      while (this.times.length > 0 && this.times[0] <= now - 1000) {
+        this.times.shift();
+      }
+
+      var delta = (now - this.times[this.times.length - 1]) / 1000 || 0;
+
+      if (!this.lastUpdate || this.lastUpdateCounter - this.lastUpdate >= 0.5) {
+        this.lastUpdate = now;
+        this.lastUpdateCounter = now;
+        this.fps = this.times.length;
+
+        if (this.items.length > this.maxItems) {
+          this.items.shift();
+        }
+
+        this.items.push(this.fps);
+      }
+
+      this.lastUpdateCounter += delta;
+      this.times.push(now);
+    }
+  }]);
+
+  return Fps;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Fps);
+
+/***/ }),
+
+/***/ "./src/js/Player.js":
+/*!**************************!*\
+  !*** ./src/js/Player.js ***!
+  \**************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Player = /*#__PURE__*/function () {
+  function Player() {
+    _classCallCheck(this, Player);
+
+    this.position = {
+      x: 100,
+      y: 100
+    };
+    this.velocity = {
+      x: 0,
+      y: 20
+    };
+    this.width = 50;
+    this.height = 50;
+  }
+
+  _createClass(Player, [{
+    key: "draw",
+    value: function draw(_ref) {
+      var c = _ref.c;
+      c.save();
+      c.fillRect(this.position.x, this.position.y, this.width, this.height);
+      c.restore();
+    }
+  }, {
+    key: "update",
+    value: function update(_ref2) {
+      var c = _ref2.c;
+      this.draw({
+        c: c
+      });
+    }
+  }]);
+
+  return Player;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Player);
+
+/***/ }),
+
 /***/ "./src/js/canvas.js":
 /*!**************************!*\
   !*** ./src/js/canvas.js ***!
@@ -95,114 +253,96 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+/* harmony import */ var _Fps__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Fps */ "./src/js/Fps.js");
+/* harmony import */ var _Player__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Player */ "./src/js/Player.js");
 
 
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-var mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
-};
-var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']; // Event Listeners
-
-addEventListener('mousemove', function (event) {
-  mouse.x = event.clientX;
-  mouse.y = event.clientY;
-});
-addEventListener('resize', function () {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-  init();
-}); // Objects
-
-var _Object = /*#__PURE__*/function () {
-  function Object(x, y, radius, color) {
-    _classCallCheck(this, Object);
-
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-  }
-
-  _createClass(Object, [{
-    key: "draw",
-    value: function draw() {
-      c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-      c.fillStyle = this.color;
-      c.fill();
-      c.closePath();
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      this.draw();
-    }
-  }]);
-
-  return Object;
-}(); // Implementation
-
-
-var objects;
+var canvas;
+var ctx;
+var baseCanvasWidth = 640;
+var baseCanvasHeight = 480;
+var fullscreen = true;
+var angle = 0;
+var speed = 0.05;
+var player;
+var fpsCounter;
 
 function init() {
-  objects = [];
+  canvas = document.getElementById('canvas');
+  ctx = canvas.getContext('2d');
+  window.addEventListener("resize", windowSizeChanged);
+  resizeCanvas();
+  initParams();
+  tick();
+}
 
-  for (var i = 0; i < 400; i++) {// objects.push()
+function initParams() {
+  player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"]();
+  fpsCounter = new _Fps__WEBPACK_IMPORTED_MODULE_0__["default"]({
+    canvasWidth: canvas.width / 2
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var y = Math.sin(angle) * 100;
+  angle += speed;
+
+  for (var i = 0; i < 100; i++) {
+    drawLine(ctx, 100 + i * y, y, 0, 1000);
   }
-} // Animation Loop
 
+  player.update({
+    c: ctx
+  });
+  fpsCounter.update({
+    c: ctx
+  });
+}
 
-function animate() {
-  requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y); // objects.forEach(object => {
-  //  object.update()
-  // })
+function tick() {
+  requestAnimationFrame(tick);
+  draw();
+}
+
+function windowSizeChanged() {
+  resizeCanvas();
+  initParams();
+}
+
+function resizeCanvas() {
+  console.log("devicePixelRatio: " + window.devicePixelRatio);
+  console.log("canvas size: " + canvas.width + " x " + canvas.height);
+  console.log("canvas style size: " + canvas.style.width + "px x " + canvas.style.height + "px");
+
+  if (fullscreen) {
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    console.log("window size: " + windowWidth + " x " + windowHeight);
+    canvas.width = Math.floor(windowWidth * window.devicePixelRatio);
+    canvas.height = Math.floor(windowHeight * window.devicePixelRatio);
+    canvas.style.width = windowWidth + "px";
+    canvas.style.height = windowHeight + "px";
+  } else {
+    canvas.width = Math.floor(baseCanvasWidth * window.devicePixelRatio);
+    canvas.height = Math.floor(baseCanvasHeight * window.devicePixelRatio);
+    canvas.style.width = baseCanvasWidth + "px";
+    canvas.style.height = baseCanvasHeight + "px";
+  }
+
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  console.log("new canvas size: " + canvas.width + " x " + canvas.height);
+  console.log("new canvas style size: " + canvas.style.width + "px x " + canvas.style.height + "px");
+}
+
+function drawLine(ctx, x1, y1, x2, y2) {
+  ctx.beginPath();
+  ctx.moveTo(x1 + 0.5, y1 + 0.5);
+  ctx.lineTo(x2 + 0.5, y2 + 0.5);
+  ctx.stroke();
 }
 
 init();
-animate();
-
-/***/ }),
-
-/***/ "./src/js/utils.js":
-/*!*************************!*\
-  !*** ./src/js/utils.js ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function randomIntFromRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function randomColor(colors) {
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-function distance(x1, y1, x2, y2) {
-  var xDist = x2 - x1;
-  var yDist = y2 - y1;
-  return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-}
-
-module.exports = {
-  randomIntFromRange: randomIntFromRange,
-  randomColor: randomColor,
-  distance: distance
-};
 
 /***/ })
 
