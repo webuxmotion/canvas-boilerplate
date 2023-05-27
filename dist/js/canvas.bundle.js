@@ -128,8 +128,8 @@ var Fps = /*#__PURE__*/function () {
       var c = _ref2.c;
       c.save();
       c.globalAlpha = 0.2;
+      c.fillStyle = "black";
       c.fillRect(this.position.x, this.position.y, this.width, this.height);
-      c.fillStyle = "green";
 
       for (var i = 0; i < this.maxItems; i++) {
         var item = this.items[i];
@@ -138,6 +138,12 @@ var Fps = /*#__PURE__*/function () {
           var height = item * this.height / 70;
           var x = this.position.x + i * this.lineWidth;
           var y = this.position.y + this.height - height;
+          c.fillStyle = "green";
+
+          if (item < 30) {
+            c.fillStyle = "red";
+          }
+
           c.globalAlpha = 0.2;
           c.fillRect(x, y, this.lineWidth, height);
           c.globalAlpha = 1;
@@ -146,6 +152,7 @@ var Fps = /*#__PURE__*/function () {
       }
 
       c.font = "20px Arial";
+      c.fillStyle = "black";
       c.fillText("FPS: ".concat(this.fps), this.position.x, this.position.y);
       c.restore();
     }

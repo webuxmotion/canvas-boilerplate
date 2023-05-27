@@ -21,8 +21,6 @@ class Fps {
     c.globalAlpha = 0.2;
     c.fillStyle = "black";
     c.fillRect(this.position.x , this.position.y, this.width, this.height);
-    
-    c.fillStyle = "green";
 
     for (let i = 0; i < this.maxItems; i++) {
       const item = this.items[i];
@@ -31,6 +29,12 @@ class Fps {
         const x = this.position.x + i * this.lineWidth;
         const y = this.position.y + this.height - height;
   
+        c.fillStyle = "green";
+        
+        if (item < 30) {
+          c.fillStyle = "red";
+        }
+        
         c.globalAlpha = 0.2;
         c.fillRect(x, y, this.lineWidth, height);
 
@@ -40,8 +44,8 @@ class Fps {
     }
 
     c.font = "20px Arial";
+    c.fillStyle = "black";
     c.fillText( `FPS: ${this.fps}` , this.position.x , this.position.y );
-    
     c.restore();
   }
 
