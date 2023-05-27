@@ -1,106 +1,221 @@
-import Fps from "./Fps";
-import Player from "./Player";
+import { Fps, Player } from "./classes";
+import checkPlayerOnTopOfPlatform from "./utils/checkPlayerOnTopOfPlatform";
+import { getPlatforms1 } from "./utils/getPlatforms";
+import resizeCanvas from "./utils/resizeCanvas";
+import audio from './audio';
 
 var canvas;
-var ctx;
+var c;
 var baseCanvasWidth = 640;
 var baseCanvasHeight = 480;
-var fullscreen = true;
+let fullscreen = true;
 
-let angle = 0;
-let speed = 0.05;
+// game
+
+export const GRAVITY_NORMAL = 1.4;
+export let gravity = GRAVITY_NORMAL;
+let backgroundSpeed;
+
+let keys;
+let game;
+let lastKey;
+let scrollOffset;
+let currentLevel = 1;
 
 let player;
 let fpsCounter;
+let platforms;
 
-function init()
-{
-    canvas = document.getElementById( 'canvas' );
-    ctx = canvas.getContext( '2d' );
+window.onload = () => {
+  init();
+};
 
-    window.addEventListener( "resize" , windowSizeChanged );
+function selectLevel(currentLevel) {
+  
+  switch (currentLevel) {
+    case 1:
+      initParams();
+      break;
+    default:
+      console.log('default case. selectLevel function');
+  }
+}
 
-    resizeCanvas();
-
-    initParams();
-
-    tick();
+function init() {
+  canvas = document.getElementById("canvas");
+  c = canvas.getContext("2d");
+  window.addEventListener("resize", windowSizeChanged);
+  resizeCanvas({ c, canvas, fullscreen, baseCanvasWidth, baseCanvasHeight });
+  selectLevel(currentLevel);
+  tick();
 }
 
 function initParams() {
-    player = new Player();
-    fpsCounter = new Fps({ canvasWidth: canvas.width / 2 });
+  keys = {
+    right: {
+      pressed: false,
+    },
+    left: {
+      pressed: false,
+    },
+  };
+  lastKey = "right";
+  game = {
+    disableUserInput: false
+  };
+  scrollOffset = 0;
+  player = new Player();
+  platforms = getPlatforms1({ canvas });
+  backgroundSpeed = player.speed * 0.4;
+  fpsCounter = new Fps({ canvasWidth: canvas.width / 2 });
 }
 
-function draw()
-{
-    ctx.clearRect( 0 , 0 , canvas.width , canvas.height );
-    
-    const y = Math.sin(angle) * 100;
-    angle += speed;
+function draw() {
+  c.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < 100; i++) {
-        drawLine( ctx , 100 + i * y , y , 0 , 1000 );
+  platforms.forEach((platform) => {
+    platform.update({ c });
+  });
+
+  player.update({ c });
+
+  // fps counter should be at the end of draw
+  fpsCounter.update({ c });
+
+  c.fillText(scrollOffset, 10, 10);
+}
+
+function tick() {
+  requestAnimationFrame(tick);
+
+  draw();
+
+  platforms.forEach((platform) => {
+    // check if player on top of platform
+    if (checkPlayerOnTopOfPlatform({ player, platform })) {
+      player.velocity.y = 0;
     }
+  });
 
-    player.update({ c: ctx });
+  if (player.position.y > canvas.height / 2) {
+    selectLevel(currentLevel)
+  }
 
+  // scrolling code
+  if (
+    keys.right.pressed &&
+    player.position.x + player.width < canvas.width / 2 / 2
+  ) {
+    player.velocity.x = player.speed;
+  } else if (
+    keys.left.pressed && player.position.x > 200 ||
+    (keys.left.pressed && scrollOffset === 0 && player.position.x > 0)
+  ) {
+    player.velocity.x = -player.speed;
+  } else {
+    player.velocity.x = 0;
 
-    fpsCounter.update({ c: ctx });
-}
+    if (keys.right.pressed) {
+      for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        platform.velocity.x = -player.speed;
+      }
 
-function tick() 
-{ 
-    requestAnimationFrame( tick );
+      scrollOffset += player.speed;
 
-    draw();
-}
+    } else if (keys.left.pressed && scrollOffset > 0) {
+      for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        platform.velocity.x = player.speed;
+      }
 
-function windowSizeChanged()
-{
-    resizeCanvas();
-    initParams();
-}
-
-function resizeCanvas()
-{
-    console.log( "devicePixelRatio: "+window.devicePixelRatio );
-    console.log( "canvas size: "+canvas.width+" x "+canvas.height );
-    console.log( "canvas style size: "+canvas.style.width+"px x "+canvas.style.height+"px" );
-
-    if ( fullscreen )
-    {
-        var windowWidth = window.innerWidth;
-        var windowHeight = window.innerHeight;
-        console.log( "window size: "+windowWidth+" x "+windowHeight );
-
-        canvas.width = Math.floor( windowWidth * window.devicePixelRatio );
-        canvas.height = Math.floor( windowHeight * window.devicePixelRatio );
-
-        canvas.style.width = windowWidth+"px";
-        canvas.style.height = windowHeight+"px";
+      scrollOffset -= player.speed;
+    } else {
+      for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        platform.velocity.x = 0;
+      }
     }
-    else 
-    {
-        canvas.width = Math.floor( baseCanvasWidth * window.devicePixelRatio );
-        canvas.height = Math.floor( baseCanvasHeight * window.devicePixelRatio );
-
-        canvas.style.width = baseCanvasWidth+"px";
-        canvas.style.height = baseCanvasHeight+"px";
-    }
-
-    ctx.scale( window.devicePixelRatio , window.devicePixelRatio );
-
-    console.log( "new canvas size: "+canvas.width+" x "+canvas.height );
-    console.log( "new canvas style size: "+canvas.style.width+"px x "+canvas.style.height+"px" );
+  }
 }
 
-function drawLine( ctx , x1 , y1 , x2 , y2 )
-{
-    ctx.beginPath();
-    ctx.moveTo( x1+0.5 , y1+0.5 );
-    ctx.lineTo( x2+0.5 , y2+0.5 );
-    ctx.stroke();
+function windowSizeChanged() {
+  resizeCanvas({ c, canvas, fullscreen, baseCanvasWidth, baseCanvasHeight });
+  selectLevel(currentLevel);
 }
 
-init();
+addEventListener("keydown", ({ code }) => {
+  if (game.disableUserInput) return;
+
+  switch (code) {
+    case "ArrowLeft":
+    case "KeyA":
+      keys.left.pressed = true;
+      lastKey = "left";
+      break;
+    case "ArrowRight":
+    case "KeyD":
+      keys.right.pressed = true;
+      lastKey = "right";
+      break;
+    case "ArrowUp":
+    case "Space":
+    case "KeyW":
+      if (player.velocity.y === 0) {
+        audio.jump.play();
+
+        player.velocity.y = -player.jumpVelocity;
+      }
+
+      break;
+    case "KeyF":
+      if (!player.powerUps.fireFlower) return;
+
+      player.shooting = true;
+      setTimeout(() => {
+        player.shooting = false;
+      }, 100);
+
+      audio.fireFlowerShot.play();
+      let velocity = 15;
+
+      if (lastKey === "left") velocity = -velocity;
+      particles.push(
+        new Particle({
+          position: {
+            x: player.position.x + player.width / 2,
+            y: player.position.y + player.height / 2,
+          },
+          velocity: {
+            x: velocity,
+            y: 0,
+          },
+          radius: 5,
+          color: "red",
+          fireball: true
+        })
+      );
+      break;
+    default:
+  }
+});
+
+addEventListener("keyup", ({ code }) => {
+  if (game.disableUserInput) return;
+
+  switch (code) {
+    case "ArrowLeft":
+    case "KeyA":
+      keys.left.pressed = false;
+      break;
+    case "ArrowRight":
+    case "KeyD":
+      keys.right.pressed = false;
+      break;
+    case "ArrowUp":
+    case "Space":
+    case "KeyW":
+      break;
+    default:
+  }
+});  
